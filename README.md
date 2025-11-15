@@ -1,89 +1,74 @@
-# BMW
-import streamlit as st
+import random
 
-# 스트림릿 컴포넌트로 HTML 및 JavaScript 삽입
-html_string = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D 룰렛 게임 - 벅샷 룰렛</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // 씬, 카메라, 렌더러 설정
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        var renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+money_me = 100
+money_enemy = 100
 
-        // 룰렛 휠을 만들기 위한 기초 설정
-        var numSegments = 12; // 룰렛 칸의 수
-        var radius = 5;
-        var segments = [];
-        var wheelSpeed = 0; // 휠 속도 (초기값)
+while money_me > 0 and money_enemy > 0:
+    print("\n===== 새로운 라운드 시작 =====")
+    
+    my_card = random.randint(1, 10)
+    enemy_card = random.randint(1, 10)
+    
+    print(f"당신의 카드: {my_card}")
+    
+    # 베팅 시작
+    bet = int(input("베팅 금액을 입력하세요 (0 = 체크): "))
 
-        // 룰렛 휠의 각도 계산을 위한 함수
-        function createRouletteWheel() {
-            var geometry = new THREE.CylinderGeometry(radius, radius, 0.1, numSegments);
-            var material = new THREE.MeshBasicMaterial({ color: 0xdddddd, wireframe: true });
-            var wheel = new THREE.Mesh(geometry, material);
-            wheel.rotation.x = Math.PI / 2;  // Y축을 기준으로 수평으로 배치
-            scene.add(wheel);
-            
-            // 각 룰렛 칸을 색상으로 구분
-            for (let i = 0; i < numSegments; i++) {
-                var angle = (i / numSegments) * (2 * Math.PI);
-                var color = new THREE.Color(Math.random(), Math.random(), Math.random()); // 랜덤 색상
-                var segmentGeometry = new THREE.CylinderGeometry(radius, radius, 0.1, numSegments, 1, true, angle, Math.PI * 2 / numSegments);
-                var segmentMaterial = new THREE.MeshBasicMaterial({ color: color, wireframe: false });
-                var segment = new THREE.Mesh(segmentGeometry, segmentMaterial);
-                scene.add(segment);
-            }
-        }
+    # 내가 베팅하면 상대의 반응 (랜덤)
+    if bet > 0:
+        # 상대가 콜 또는 다이 결정
+        enemy_action = random.choice(["call", "fold"])
+        print(f"상대 행동: {enemy_action}")
 
-        // 애니메이션 루프
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // 룰렛 휠 회전
-            if (wheelSpeed > 0) {
-                scene.children[0].rotation.z += wheelSpeed;
-                wheelSpeed *= 0.99; // 속도 감소
-            }
+        if enemy_action == "fold":
+            print("상대가 다이했습니다! 당신 승리!")
+            money_me += bet
+            money_enemy -= bet
+            continue
+        else:
+            print("상대가 콜했습니다!")
+    
+    else:
+        print("당신은 체크했습니다.")
+        enemy_action = random.choice(["check", "bet"])
 
-            renderer.render(scene, camera);
-        }
+        if enemy_action == "bet":
+            enemy_bet = random.randint(5, 20)
+            print(f"상대가 {enemy_bet} 을(를) 베팅했습니다.")
+            choice = input("콜 하려면 c, 다이하려면 f 입력: ")
 
-        // 카메라 설정
-        camera.position.z = 10;
+            if choice == "f":
+                print("당신이 다이했습니다!")
+                money_me -= enemy_bet
+                money_enemy += enemy_bet
+                continue
+            else:
+                bet = enemy_bet
+                print("콜했습니다!")
 
-        // 룰렛 휠 생성
-        createRouletteWheel();
+        else:
+            print("상대도 체크했습니다.")
+            bet = 0
 
-        // 버튼 클릭으로 벅샷 룰렛 시작
-        function startRoulette() {
-            var randomSpeed = Math.random() * 0.2 + 0.5;  // 벅샷 효과를 위한 무작위 회전 속도
-            wheelSpeed = randomSpeed;
-        }
+    # 결과 공개
+    print(f"당신 카드: {my_card} | 상대 카드: {enemy_card}")
 
-        // 벅샷 룰렛 버튼 이벤트
-        window.addEventListener("click", function() {
-            startRoulette();
-        });
+    if my_card > enemy_card:
+        print("당신이 승리했습니다!")
+        money_me += bet
+        money_enemy -= bet
+    elif my_card < enemy_card:
+        print("상대가 승리했습니다!")
+        money_me -= bet
+        money_enemy += bet
+    else:
+        print("무승부 (베팅 금액 변동 없음).")
 
-        animate();
-    </script>
-</body>
-</html>
-"""
+    print(f"현재 소지금 → 나: {money_me} | 상대: {money_enemy}")
 
-# 스트림릿에서 HTML 렌더링
-st.components.v1.html(html_string, height=600)
+print("\n===== 게임 종료 =====")
+if money_me > money_enemy:
+    print("최종 승리!")
+else:
+    print("패배했습니다...")
+
